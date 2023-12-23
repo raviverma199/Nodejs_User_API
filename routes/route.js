@@ -8,6 +8,16 @@ require("dotenv").config();
 // =========== User signup schema ==============
 const user_signup = require("../DB_schema/User_signup");
 
+// ===========  Get route ====================
+route.get("/", async (req, res) => {
+    try {
+      res.send("200");
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+
 // =======================  Function for getting current Date  =================
 function getCurrentDate() {
   var today = new Date();
@@ -37,26 +47,26 @@ function getCurrentDateTime() {
 route.post("/User_signup", async (req, res) => {
   try {
     let user_data = {
-      user_name: req.body.User_name,
-      email: req.body.Email_Address,
+        User_name: req.body.User_name,
+        Email_Address: req.body.Email_Address,
     };
-    const password = req.body.password;
+   let  Password = req.body.Password;
     const saltRound = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRound);
-    user_data["password"] = hashedPassword;
+    const hashedPassword = await bcrypt.hash(Password, saltRound);
+    user_data["Password"] = hashedPassword;
 
     const jwt_token = jwt.sign({ user_data }, process.env.key, {
       expiresIn: "1h",
     });
 
-    const user = new create_user({
+    const user = new user_signup({
       ...user_data,
       C_date: getCurrentDate(),
       C_time: getCurrentDateTime(),
       jwt_token: jwt_token,
     });
 
-    const create_new_data = await create_user.create(user_signup);
+    const create_new_data = await user_signup.create(user);
     if (create_new_data) {
       res.status(200).json({
         status: "success",
@@ -71,13 +81,6 @@ route.post("/User_signup", async (req, res) => {
   }
 });
 
-// ===========  Get route ====================
-route.get("/", async (req, res) => {
-  try {
-    res.send("200");
-  } catch (error) {
-    console.log(error);
-  }
-});
+
 
 module.exports = route;

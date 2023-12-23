@@ -3,23 +3,25 @@ const mongoose = require("mongoose");
 const create_user = new mongoose.Schema({
   User_name: {
     type: String,
-    required: true,
+    required:true
+    
   },
   Email_Address: {
     type: String,
-    required: true,
+    required:true
+    
   },
   Password: {
     type: String,
-    required: true,
+    required:true
   },
   C_date: {
-    type: Date,
-    required: true,
+    type: String,
+    required:true    
   },
   C_time: {
     type: String,
-    required: true,
+    required:true
   },
   jwt_token: {
     type: String,
