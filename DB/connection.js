@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const mongoDBURL = "mongodb+srv://admin:admin123@cluster0.j2h40qx.mongodb.net/node_js";
+const mongoDBURL = "mongodb+srv://admin:admin123@cluster0.j2h40qx.mongodb.net/node_createuser";
 
 async function connectToDatabase() {
   try {
