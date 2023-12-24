@@ -82,5 +82,14 @@ route.post("/User_signup", async (req, res) => {
 });
 
 
+route.get('/Get_User_Data',async(req,res)=>{
+  try {
+    
+  } catch (error) {
+    console.log(error);
+  }
+})
+
+
 
 module.exports = route;
