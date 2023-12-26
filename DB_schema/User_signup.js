@@ -23,10 +23,7 @@ const create_user = new mongoose.Schema({
     type: String,
     required:true
   },
-  jwt_token: {
-    type: String,
-    match: /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.[A-Za-z0-9-_.+/=]*$/,
-  },
+
 });
 
 const User = mongoose.model('User_Signup', create_user , 'User_Signup');
