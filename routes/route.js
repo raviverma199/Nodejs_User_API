@@ -3,6 +3,9 @@ const route = express.Router();
 const connection = require("../DB/connection");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const session = require('express-session')
 require("dotenv").config();
 
 // =========== User signup schema ==============
@@ -16,6 +19,14 @@ route.get("/", async (req, res) => {
     console.log(error);
   }
 });
+
+// =======================  Use session to keep track of login status ============================
+
+route.use(session({
+  secret: process.env.key, resave: true, saveUninitialized: true 
+}));
+
+
 
 // =======================  Function for getting current Date  =================
 function getCurrentDate() {
@@ -137,14 +148,7 @@ route.get('/dashboard', verifyToken, (req, res) => {
 });
 
 
-route.post('/ususu',async(req,res)=>{
-  try {
-    let name = req.body.name
-  } catch (error) {
-    console.log(error);
-  }
-})
-
+// ======================  API to get the user data  ==========================================
 route.get("/Get_User_Data", async (req, res) => {
   try {
     const data = await user_signup.find().exec();
@@ -160,6 +164,59 @@ route.get("/Get_User_Data", async (req, res) => {
   } catch (error) {
     console.log(error);
   }
+}); 
+
+
+
+
+// ======================================   google AUTH =======================================
+
+// Initialize passport and session
+route.use(passport.initialize());
+route.use(passport.session());
+
+// Replace with your Google API credentials
+const GOOGLE_CLIENT_ID = process.env.CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.SECRET_KEY;
+const CALLBACK_URL = 'http://localhost:2000/auth/google/callback';
+
+
+passport.use(new GoogleStrategy({
+    clientID: GOOGLE_CLIENT_ID,
+    clientSecret: GOOGLE_CLIENT_SECRET,
+    callbackURL: CALLBACK_URL
+  },
+  (accessToken, refreshToken, profile, done) => {
+    return done(null, profile);
+  }
+));
+
+passport.serializeUser((user, done) => {
+  // Save user information in the session
+  done(null, user);
+});
+
+passport.deserializeUser((obj, done) => {
+  // Retrieve user information from the session
+  done(null, obj);
+  console.log(done(null, obj))
+});
+
+
+route.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+route.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/' }),
+  (req, res) => {
+    res.redirect('/');
+  }
+);
+
+route.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/');
 });
 
 module.exports = route;
