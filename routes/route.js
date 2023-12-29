@@ -137,8 +137,13 @@ route.get('/dashboard', verifyToken, (req, res) => {
 });
 
 
-
-
+route.post('/ususu',async(req,res)=>{
+  try {
+    let name = req.body.name
+  } catch (error) {
+    console.log(error);
+  }
+})
 
 route.get("/Get_User_Data", async (req, res) => {
   try {
