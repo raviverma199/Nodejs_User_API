@@ -53,25 +53,28 @@ function getCurrentDateTime() {
   return formattedDateTime;
 }
 
+
 // ===========   API for User signup for first Time  ========================
-route.post("/User_signup", async (req, res) => {
+route.post("/user_signup", async (req, res) => {
   try {
-    let user_data = {
+    // Extract user data from the request
+    const user_data = {
       User_name: req.body.User_name,
       Email_Address: req.body.Email_Address,
     };
-    let Password = req.body.Password;
-    const saltRound = 10;
-    const hashedPassword = await bcrypt.hash(Password, saltRound);
-    user_data["Password"] = hashedPassword;
 
-    const user = new user_signup({
+    // Extract and hash the password
+    const password = req.body.Password;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user_data.Password = hashedPassword;
+
+    const create_new_data = await user_signup.create({
       ...user_data,
       C_date: getCurrentDate(),
       C_time: getCurrentDateTime(),
     });
 
-    const create_new_data = await user_signup.create(user);
+    // Check if user data is successfully inserted
     if (create_new_data) {
       res.status(200).json({
         status: "success",
@@ -79,48 +82,58 @@ route.post("/User_signup", async (req, res) => {
         user: create_new_data,
       });
     } else {
-      res.status(500).json("failed to post the data");
+      // Handle case where data creation fails
+      res.status(500).json({
+        status: "error",
+        message: "Failed to create user",
+      });
     }
   } catch (error) {
-    console.log(error);
+    // Handle any errors that occur during the process
+    console.error(error);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 });
 
 
 
 // ================================  API for Login by using name and password  ============================
-
-route.get('/Login_User',async (req,res)=>{
+route.post('/login_user', async (req, res) => {
   try {
-    let {User_name,Password} = req.body;
+    const { User_name, Password } = req.body;
+    const user = await user_signup.findOne({ User_name });
 
-    const get_user = await user_signup.findOne({User_name});
-
-    if(!get_user){
-      return res.status(401).json('invalid credintial')
+    if (!user) {
+      return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
     }
 
-    const matchPassword = await bcrypt.compare(Password,get_user.Password)
-    console.log(matchPassword);
-    if(!matchPassword){
-      return res.status(401).json('invalid credential') 
+    const isPasswordMatch = await bcrypt.compare(Password, user.Password);
+
+    if (!isPasswordMatch) {
+      return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ user_id: get_user._id, User_name: get_user.User_name }, process.env.key, {
-      expiresIn: '1h', 
-    });
+    // Generate JWT token
+    const token = jwt.sign(
+      { user_id: user._id, User_name: user.User_name },
+      process.env.KEY,
+      { expiresIn: '1h' }
+    );
+
     res.status(200).json({
       status: 'success',
       message: 'Login successful',
       token: token,
     });
-
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ status: 'error', message: 'Internal server error' });
-
   }
-})
+});
 
 // =====================================   middleware to verify the jsonwebtoken ===========================
 const verifyToken = (req, res, next) => {
@@ -149,22 +162,32 @@ route.get('/dashboard', verifyToken, (req, res) => {
 
 
 // ======================  API to get the user data  ==========================================
-route.get("/Get_User_Data", async (req, res) => {
+route.get('/get_user_data', async (req, res) => {
   try {
+    // Fetch all user data
     const data = await user_signup.find().exec();
-    const decodedTokens = data.map(user => jwt.verify(user.jwt_token, process.env.key));
 
-    if (data) {
+    if (data.length > 0) {
       res.status(200).json({
-        status: "success",
+        status: 'success',
+        message: 'User data retrieved successfully',
         user: data,
-        decodedTokens:decodedTokens
+      });
+    } else {
+      res.status(404).json({
+        status: 'error',
+        message: 'No users found',
       });
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Internal server error',
+      error: error.message,
+    });
   }
-}); 
+});
 
 
 
@@ -177,7 +200,7 @@ route.use(passport.session());
 
 // Replace with your Google API credentials
 const GOOGLE_CLIENT_ID = process.env.CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.SECRET_KEY;
+const GOOGLE_CLIENT_SECRET = process.env.CLIENT_SECRET_KEY;
 const CALLBACK_URL = 'http://localhost:2000/auth/google/callback';
 
 
