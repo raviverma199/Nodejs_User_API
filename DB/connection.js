@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+require("dotenv").config();
 
-const mongoDBURL = "mongodb+srv://admin:admin123@cluster0.j2h40qx.mongodb.net/node_createuser";
+const mongoDBURL = process.env.DATABASE_STRING
 
 async function connectToDatabase() {
   try {

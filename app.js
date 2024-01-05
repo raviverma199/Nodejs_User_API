@@ -8,6 +8,7 @@ app.use('/',routes)
 
 
 const port = process.env.PORT;
-app.listen(port, () => {
+
+app.listen(port || 8000, () => {
     console.log(`Server is running on port ${port}`);
 });
