@@ -2,7 +2,6 @@ Node.js API Playground
 Introduction
 Welcome to the Node.js API Playground – an extensive repository designed to explore fundamental backend API functionalities while prioritizing robust web security practices. This project serves as both a practical application and an educational resource, offering hands-on implementations for secure coding in Node.js development.
 
-Key Features
 Google Authentication through OAuth
 Experience seamless Google Authentication with OAuth, providing users with a convenient and secure way to access the API.
 
