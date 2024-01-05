@@ -8,7 +8,7 @@ Experience seamless Google Authentication with OAuth, providing users with a con
 User Registration and Login System
 A robust user registration and login system is in place, featuring secure password handling practices to ensure the confidentiality of user credentials.
 
-JSON Web Tokens (JWT) Integration
+JSON Web Tokens (JWT) Integration   
 The API leverages JSON Web Tokens (JWT) for stateless and secure authentication. This enhances the overall security of the application while facilitating efficient user management.
 
 Content Security Policy (CSP) Headers
