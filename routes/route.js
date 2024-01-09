@@ -155,9 +155,15 @@ const verifyToken = (req, res, next) => {
 
 
 
-// ========================  user access if the credentials are true  =========================
-route.get('/dashboard', verifyToken, (req, res) => {
-  res.status(200).json({ status: 'success', message: 'Access granted', user: req.user });
+
+// Route for fetching all users (admin access only)
+route.get('/users', verifyToken, (req, res) => {
+  if (req.user.role === 'admin') {
+
+    res.status(200).json({ status: 'success', message: 'List of all users', users });
+  } else {
+    res.status(403).json({ status: 'error', message: 'Access denied. Insufficient privileges.' });
+  }
 });
 
 
