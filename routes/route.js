@@ -195,9 +195,6 @@ route.get('/get_user_data', async (req, res) => {
   }
 });
 
-
-
-
 // ======================================   google AUTH =======================================
 
 // Initialize passport and session
@@ -211,14 +208,31 @@ const CALLBACK_URL = 'http://localhost:2000/auth/google/callback';
 
 
 passport.use(new GoogleStrategy({
-    clientID: GOOGLE_CLIENT_ID,
-    clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: CALLBACK_URL
-  },
-  (accessToken, refreshToken, profile, done) => {
-    return done(null, profile);
+  clientID: GOOGLE_CLIENT_ID,
+  clientSecret: GOOGLE_CLIENT_SECRET,
+  callbackURL: CALLBACK_URL
+},
+async (accessToken, refreshToken, profile, done) => {
+  try {
+    // Check if the user already exists in your database
+    let user = await user_signup.findOne({ googleId: profile.id });
+
+    if (!user) {
+      // If the user doesn't exist, create a new user in the database
+      user = new user_signup({
+        googleId: profile.id,
+        displayName: profile.displayName,
+        email: profile.emails[0].value,
+      });
+      await user.save();
+    }
+    return done(null, user);
+  } catch (error) {
+    return done(error, null);
   }
+}
 ));
+
 
 passport.serializeUser((user, done) => {
   // Save user information in the session
@@ -239,7 +253,8 @@ route.get('/auth/google',
 route.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
-    res.redirect('/');
+    // Successful authentication, redirect to dashboard or profile page
+    res.redirect('/dashboard');
   }
 );
 
@@ -250,6 +265,5 @@ route.get('/logout', (req, res) => {
 
 
 
-// =========================
 
 module.exports = route;
