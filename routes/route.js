@@ -101,6 +101,59 @@ route.post("/user_signup", async (req, res) => {
 
 
 
+
+
+// ===========================  API FOR UPDATE THE USER INFORMATION =============================
+
+route.put('/api/update_user', async (req, res) => {
+  try {
+    const user_data = {
+      User_name: req.body.User_name,
+      Email_Address: req.body.Email_Address
+    };
+    const filter = { Email_Address: user_data.Email_Address };
+    
+    const update = { $set: { User_name: user_data.User_name } };
+
+    const result = await user_signup.updateMany(filter, update);
+
+    if (result.nModified > 0) {
+      res.json({ message: 'Users updated successfully' });
+    } else {
+      res.json({ message: 'No matching users found' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+// =============================  API FOR DELETE THE SPECIFIC USER =====================================
+
+route.delete('/api/delete_user', async (req, res) => {
+  try {
+    const emailToDelete = req.body.Email_Address;
+
+    if (!emailToDelete) {
+      return res.status(400).json({ error: 'Email_Address is required for deletion.' });
+    }
+
+    const result = await user_signup.deleteMany({ Email_Address: emailToDelete });
+
+    if (result.deletedCount > 0) {
+      res.json({ message: 'Users deleted successfully' });
+    } else {
+      res.json({ message: 'No matching users found for deletion' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
 // ================================  API for Login by using name and password  ============================
 route.post('/login_user', async (req, res) => {
   try {
