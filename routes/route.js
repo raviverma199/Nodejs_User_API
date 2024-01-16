@@ -3,9 +3,9 @@ const route = express.Router();
 const connection = require("../DB/connection");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const session = require('express-session')
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const session = require("express-session");
 require("dotenv").config();
 
 // =========== User signup schema ==============
@@ -22,11 +22,13 @@ route.get("/", async (req, res) => {
 
 // =======================  Use session to keep track of login status ============================
 
-route.use(session({
-  secret: process.env.key, resave: true, saveUninitialized: true 
-}));
-
-
+route.use(
+  session({
+    secret: process.env.key,
+    resave: true,
+    saveUninitialized: true,
+  })
+);
 
 // =======================  Function for getting current Date  =================
 function getCurrentDate() {
@@ -52,7 +54,6 @@ function getCurrentDateTime() {
 
   return formattedDateTime;
 }
-
 
 // ===========   API for User signup for first Time  ========================
 route.post("/user_signup", async (req, res) => {
@@ -99,92 +100,93 @@ route.post("/user_signup", async (req, res) => {
   }
 });
 
-
-
-
-
 // ===========================  API FOR UPDATE THE USER INFORMATION =============================
 
-route.put('/api/update_user', async (req, res) => {
+route.put("/api/update_user", async (req, res) => {
   try {
     const user_data = {
       User_name: req.body.User_name,
-      Email_Address: req.body.Email_Address
+      Email_Address: req.body.Email_Address,
     };
     const filter = { Email_Address: user_data.Email_Address };
-    
+
     const update = { $set: { User_name: user_data.User_name } };
 
     const result = await user_signup.updateMany(filter, update);
 
     if (result.nModified > 0) {
-      res.json({ message: 'Users updated successfully' });
+      res.json({ message: "Users updated successfully" });
     } else {
-      res.json({ message: 'No matching users found' });
+      res.json({ message: "No matching users found" });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-
 // =============================  API FOR DELETE THE SPECIFIC USER =====================================
 
-route.delete('/api/delete_user', async (req, res) => {
+route.delete("/api/delete_user", async (req, res) => {
   try {
     const emailToDelete = req.body.Email_Address;
 
     if (!emailToDelete) {
-      return res.status(400).json({ error: 'Email_Address is required for deletion.' });
+      return res
+        .status(400)
+        .json({ error: "Email_Address is required for deletion." });
     }
 
-    const result = await user_signup.deleteMany({ Email_Address: emailToDelete });
+    const result = await user_signup.deleteMany({
+      Email_Address: emailToDelete,
+    });
 
     if (result.deletedCount > 0) {
-      res.json({ message: 'Users deleted successfully' });
+      res.json({ message: "Users deleted successfully" });
     } else {
-      res.json({ message: 'No matching users found for deletion' });
+      res.json({ message: "No matching users found for deletion" });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-
-
 // ================================  API for Login by using name and password  ============================
-route.post('/login_user', async (req, res) => {
+route.post("/login_user", async (req, res) => {
   try {
     const { User_name, Password } = req.body;
     const user = await user_signup.findOne({ User_name });
 
     if (!user) {
-      return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
+      return res
+        .status(401)
+        .json({ status: "error", message: "Invalid credentials" });
     }
 
     const isPasswordMatch = await bcrypt.compare(Password, user.Password);
 
     if (!isPasswordMatch) {
-      return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
+      return res
+        .status(401)
+        .json({ status: "error", message: "Invalid credentials" });
     }
 
     // Generate JWT token
     const token = jwt.sign(
       { user_id: user._id, User_name: user.User_name },
       process.env.KEY,
-      { expiresIn: '1h' }
+      { expiresIn: "1h" }
     );
 
     res.status(200).json({
-      status: 'success',
-      message: 'Login successful',
+      status: "success",
+      message: "Login successful",
       token: token,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: 'error', message: 'Internal server error' });
+    res.status(500).json({ status: "error", message: "Internal server error" });
   }
 });
 
@@ -193,12 +195,16 @@ const verifyToken = (req, res, next) => {
   const token = req.headers.authorization;
 
   if (!token) {
-    return res.status(401).json({ status: 'error', message: 'Unauthorized: Token is missing' });
+    return res
+      .status(401)
+      .json({ status: "error", message: "Unauthorized: Token is missing" });
   }
 
   jwt.verify(token, process.env.key, (err, decoded) => {
     if (err) {
-      return res.status(401).json({ status: 'error', message: 'Unauthorized: Invalid token' });
+      return res
+        .status(401)
+        .json({ status: "error", message: "Unauthorized: Invalid token" });
     }
 
     req.user = decoded;
@@ -206,43 +212,43 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-
-
-
 // Route for fetching all users (admin access only)
-route.get('/users', verifyToken, (req, res) => {
-  if (req.user.role === 'admin') {
-
-    res.status(200).json({ status: 'success', message: 'List of all users', users });
+route.get("/users", verifyToken, (req, res) => {
+  if (req.user.role === "admin") {
+    res
+      .status(200)
+      .json({ status: "success", message: "List of all users", users });
   } else {
-    res.status(403).json({ status: 'error', message: 'Access denied. Insufficient privileges.' });
+    res.status(403).json({
+      status: "error",
+      message: "Access denied. Insufficient privileges.",
+    });
   }
 });
 
-
 // ======================  API to get the user data  ==========================================
-route.get('/get_user_data', async (req, res) => {
+route.get("/get_user_data", async (req, res) => {
   try {
     // Fetch all user data
     const data = await user_signup.find().exec();
 
     if (data.length > 0) {
       res.status(200).json({
-        status: 'success',
-        message: 'User data retrieved successfully',
+        status: "success",
+        message: "User data retrieved successfully",
         user: data,
       });
     } else {
       res.status(404).json({
-        status: 'error',
-        message: 'No users found',
+        status: "error",
+        message: "No users found",
       });
     }
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      status: 'error',
-      message: 'Internal server error',
+      status: "error",
+      message: "Internal server error",
       error: error.message,
     });
   }
@@ -257,35 +263,36 @@ route.use(passport.session());
 // Replace with your Google API credentials
 const GOOGLE_CLIENT_ID = process.env.CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.CLIENT_SECRET_KEY;
-const CALLBACK_URL = 'http://localhost:2000/auth/google/callback';
+const CALLBACK_URL = "http://localhost:2000/auth/google/callback";
 
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: GOOGLE_CLIENT_ID,
+      clientSecret: GOOGLE_CLIENT_SECRET,
+      callbackURL: CALLBACK_URL,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        // Check if the user already exists in your database
+        let user = await user_signup.findOne({ googleId: profile.id });
 
-passport.use(new GoogleStrategy({
-  clientID: GOOGLE_CLIENT_ID,
-  clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: CALLBACK_URL
-},
-async (accessToken, refreshToken, profile, done) => {
-  try {
-    // Check if the user already exists in your database
-    let user = await user_signup.findOne({ googleId: profile.id });
-
-    if (!user) {
-      // If the user doesn't exist, create a new user in the database
-      user = new user_signup({
-        googleId: profile.id,
-        displayName: profile.displayName,
-        email: profile.emails[0].value,
-      });
-      await user.save();
+        if (!user) {
+          // If the user doesn't exist, create a new user in the database
+          user = new user_signup({
+            googleId: profile.id,
+            displayName: profile.displayName,
+            email: profile.emails[0].value,
+          });
+          await user.save();
+        }
+        return done(null, user);
+      } catch (error) {
+        return done(error, null);
+      }
     }
-    return done(null, user);
-  } catch (error) {
-    return done(error, null);
-  }
-}
-));
-
+  )
+);
 
 passport.serializeUser((user, done) => {
   // Save user information in the session
@@ -295,28 +302,26 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((obj, done) => {
   // Retrieve user information from the session
   done(null, obj);
-  console.log(done(null, obj))
+  console.log(done(null, obj));
 });
 
-
-route.get('/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
+route.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-route.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/' }),
+route.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/" }),
   (req, res) => {
     // Successful authentication, redirect to dashboard or profile page
-    res.redirect('/dashboard');
+    res.redirect("/dashboard");
   }
 );
 
-route.get('/logout', (req, res) => {
+route.get("/logout", (req, res) => {
   req.logout();
-  res.redirect('/');
+  res.redirect("/");
 });
-
-
-
 
 module.exports = route;
