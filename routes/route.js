@@ -11,6 +11,9 @@ require("dotenv").config();
 // =========== User signup schema ==============
 const user_signup = require("../DB_schema/User_signup");
 
+// ==============  shopping cart schema  ======================
+const Cart_Schema = require("../DB_schema/cart_schema");
+
 // ===========  Get route ====================
 route.get("/", async (req, res) => {
   try {
@@ -193,7 +196,6 @@ route.post("/login_user", async (req, res) => {
 // =====================================   middleware to verify the jsonwebtoken ===========================
 const verifyToken = (req, res, next) => {
   const token = req.headers.authorization;
-
   if (!token) {
     return res
       .status(401)
@@ -322,6 +324,58 @@ route.get(
 route.get("/logout", (req, res) => {
   req.logout();
   res.redirect("/");
+});
+
+/**
+ * =====================================================================================================================
+ * ==================================================  API FOR SHOPPING CART  ==========================================
+ * =====================================================================================================================
+ */
+
+// ========================   FUNCTION for generating billNo =======================
+function Generate_billno() {
+  try {
+    const startnumber = 100000;
+    const EndNumber = 900000;
+
+    const create_Number = Math.floor(startnumber + Math.random() * EndNumber);
+
+    return create_Number;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+route.post("/api/Shopping_Cart", async (req, res) => {
+  try {
+
+
+    const SaveCart_Data = await Cart_Schema.create({
+      CustomerName: req.body.CustomerName,
+      BillNo: Generate_billno(),
+      ItemPurchase: req.body.ItemPurchase,
+      CashBack: req.body.CashBack,
+      Payment_Mode: req.body.Payment_Mode,
+      Current_Date: getCurrentDate(),
+      Current_Time: getCurrentDateTime(),
+    });
+
+    console.log(SaveCart_Data);
+
+    if(res.statusCode === 200){
+      res.json({msg:"data saved succesfully"})
+    }else{
+      res.json({msg:"problem to save Data"})
+    }
+
+  } catch (error) {
+    console.log(error);
+    if (res.status === 500) {
+      res.json({ msg: "internal server error" });
+    } else {
+      res.json({ msg: "something went wrong" });
+    }
+  }
 });
 
 module.exports = route;
