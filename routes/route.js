@@ -348,26 +348,25 @@ function Generate_billno() {
 
 route.post("/api/Shopping_Cart", async (req, res) => {
   try {
-
+    const { CustomerName, ItemPurchase, CashBack, Payment_Mode } = req.body;
 
     const SaveCart_Data = await Cart_Schema.create({
-      CustomerName: req.body.CustomerName,
+      CustomerName,
       BillNo: Generate_billno(),
-      ItemPurchase: req.body.ItemPurchase,
-      CashBack: req.body.CashBack,
-      Payment_Mode: req.body.Payment_Mode,
+      ItemPurchase,
+      CashBack,
+      Payment_Mode,
       Current_Date: getCurrentDate(),
       Current_Time: getCurrentDateTime(),
     });
 
     console.log(SaveCart_Data);
 
-    if(res.statusCode === 200){
-      res.json({msg:"data saved succesfully"})
-    }else{
-      res.json({msg:"problem to save Data"})
+    if (res.statusCode === 200) {
+      res.json({ msg: "data saved succesfully" });
+    } else {
+      res.json({ msg: "problem to save Data" });
     }
-
   } catch (error) {
     console.log(error);
     if (res.status === 500) {
