@@ -58,6 +58,25 @@ function getCurrentDateTime() {
   return formattedDateTime;
 }
 
+// ============================  middlewares ===================================
+const redirectLogin = (req, res, next) => {
+  try {
+      // Check if the user is authenticated using Passport.js
+      if (!req.isAuthenticated()) {
+          // If not authenticated, redirect to the login page or initiate Google OAuth
+          return res.redirect('/auth/google');
+      }
+
+      // If authenticated, proceed to the next middleware or route handler
+      return next();
+  } catch (error) {
+      console.error(error);
+      // Handle any errors that occur during authentication
+      res.status(500).send('Internal Server Error');
+  }
+};
+
+
 // ===========   API for User signup for first Time  ========================
 route.post("/user_signup", async (req, res) => {
   try {
@@ -215,7 +234,7 @@ const verifyToken = (req, res, next) => {
 };
 
 // Route for fetching all users (admin access only)
-route.get("/users", verifyToken, (req, res) => {
+route.get("/users", redirectLogin, (req, res) => {
   if (req.user.role === "admin") {
     res
       .status(200)
