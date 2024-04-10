@@ -7,6 +7,7 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const session = require("express-session");
 require("dotenv").config();
+const controller = require('../controller/controller')
 
 // =========== User signup schema ==============
 const user_signup = require("../DB_schema/User_signup");
