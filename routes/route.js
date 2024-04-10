@@ -358,12 +358,12 @@ function Generate_billno() {
     const EndNumber = 900000;
 
     const create_Number = Math.floor(startnumber + Math.random() * EndNumber);
-
     return create_Number;
   } catch (error) {
     console.log(error);
   }
 }
+
 
 route.post("/api/Shopping_Cart", async (req, res) => {
   try {
@@ -395,5 +395,32 @@ route.post("/api/Shopping_Cart", async (req, res) => {
     }
   }
 });
+
+
+route.get('/api/GetCartData',async(req,res)=>{
+  try {
+    let getData = await Cart_Schema.findOne();
+    let newData = []
+    for(let i=0; i<getData.length; i++){
+      newData.push(getData[i])
+    }
+    
+    if(newData[1].CustomerName == 'rohit'){
+      console.log('this is okkkk')
+    }else{
+      console.log('this come in false condition');
+      }
+    
+    res.json({data:newData[1]})
+
+  } catch (error) {
+    console.log(error);
+  }
+})
+
+
+
+
+
 
 module.exports = route;
