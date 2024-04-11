@@ -24,3 +24,24 @@ exports.GetUserData = async(req,res) => {
 };
 
 
+exports.DeleteCart = async(req,res)=>{
+    try {
+        let ItemID = req.body.ItemID
+
+        if(!ItemID){
+            throw new Error('ItemID is missing')
+        }
+
+        let DeleteCart = await cart_Schema.deleteOne({ItemID : ItemID});
+
+        if(DeleteCart.deletedCount == 1){
+            res.json({msg:'Cart Deleted Sucessfully'});
+        }else{
+            res.json({msg:'something  went wrong!'});
+        }
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({msg:"internal server error"})
+    }
+}

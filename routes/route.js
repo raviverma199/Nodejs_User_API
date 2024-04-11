@@ -432,5 +432,9 @@ route.get('/api/GetCartData',async(req,res)=>{
 route.get('/api/UserCartData',controller.GetUserData); // get user details by passing token
 
 
+route.delete('/api/DeleteCart',controller.DeleteCart) //
+
+
+
 
 module.exports = route;
