@@ -7,13 +7,14 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const session = require("express-session");
 require("dotenv").config();
-const controller = require('../controller/controller');
+const controller = require("../controller/controller");
 
 // =========== User signup schema ==============
 const user_signup = require("../DB_schema/User_signup");
 
 // ==============  shopping cart schema  ======================
 const Cart_Schema = require("../DB_schema/cart_schema");
+const cart_Schema = require("../DB_schema/cart_schema");
 
 // ===========  Get route ====================
 route.get("/", async (req, res) => {
@@ -62,21 +63,20 @@ function getCurrentDateTime() {
 // ============================  middlewares ===================================
 const redirectLogin = (req, res, next) => {
   try {
-      // Check if the user is authenticated using Passport.js
-      if (!req.isAuthenticated()) {
-          // If not authenticated, redirect to the login page or initiate Google OAuth
-          return res.redirect('/auth/google');
-      }
+    // Check if the user is authenticated using Passport.js
+    if (!req.isAuthenticated()) {
+      // If not authenticated, redirect to the login page or initiate Google OAuth
+      return res.redirect("/auth/google");
+    }
 
-      // If authenticated, proceed to the next middleware or route handler
-      return next();
+    // If authenticated, proceed to the next middleware or route handler
+    return next();
   } catch (error) {
-      console.error(error);
-      // Handle any errors that occur during authentication
-      res.status(500).send('Internal Server Error');
+    console.error(error);
+    // Handle any errors that occur during authentication
+    res.status(500).send("Internal Server Error");
   }
 };
-
 
 // ===========   API for User signup for first Time  ========================
 route.post("/user_signup", async (req, res) => {
@@ -365,7 +365,6 @@ function Generate_billno() {
   }
 }
 
-
 route.post("/api/Shopping_Cart", async (req, res) => {
   try {
     const { CustomerName, ItemPurchase, CashBack, Payment_Mode } = req.body;
@@ -397,44 +396,65 @@ route.post("/api/Shopping_Cart", async (req, res) => {
   }
 });
 
-
-route.get('/api/GetCartData',async(req,res)=>{
+route.get("/api/GetCartData", async (req, res) => {
   try {
     let getData = await Cart_Schema.findOne();
-    let newData = []
-    for(let i=0; i<getData.length; i++){
-      newData.push(getData[i])
+    let newData = [];
+    for (let i = 0; i < getData.length; i++) {
+      newData.push(getData[i]);
     }
-    
-    if(newData[1].CustomerName == 'rohit'){
-      console.log('this is okkkk')
-    }else{
-      console.log('this come in false condition');
-      }
-    
-    res.json({data:newData[1]})
 
+    if (newData[1].CustomerName == "rohit") {
+      console.log("this is okkkk");
+    } else {
+      console.log("this come in false condition");
+    }
+
+    res.json({ data: newData[1] });
   } catch (error) {
     console.log(error);
   }
-})
+});
+
+route.get("/api/GetUserData", async (req, res) => {
+  try {
+    let { UserName, Email, Password } = req.body;
+
+    if (!UserName || !Email || !Password)
+      return res
+        .status(500)
+        .json({ msg: "some field is missing in user input" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: "Internal Server Error" });
+  }
+});
+
+
 
 
 /**
- * 
- * 
+ *
+ *
  * ======================   cart data controller ===========================
- * 
+ *
  */
 
+route.get("/api/UserCartData", controller.GetUserData); // get user details by passing token
 
+route.delete("/api/DeleteCart", controller.DeleteCart); //
 
-route.get('/api/UserCartData',controller.GetUserData); // get user details by passing token
+route.get("/api/data", async (req, res) => {
+  try {
 
+    let DealerCode = req?.body?.dealercode ?? 'by default value'
 
-route.delete('/api/DeleteCart',controller.DeleteCart) //
-
-
-
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ success: false, msg: "internal server error" });
+  }
+});
 
 module.exports = route;
